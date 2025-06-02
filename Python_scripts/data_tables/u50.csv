@@ -1,4 +1,4 @@
-,Profile,SDR_min,SDR_max,u50
+,Profile,ADT_min,ADT_max,u50
 0,DASM,0,31999,0.1
 1,DASM,32000,1000000,0.095
 2,DGPG,0,31999,0.1
