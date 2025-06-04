@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import math
 
 class BasicSection:
@@ -180,16 +181,39 @@ class BasicSection:
         
         return opt_speed
 
-    # def calculate_avg_speed(self):
+    def van_aerde_calculations(self):
+        
+        # model parameters
+        capacity = self.estimate_base_capacity()
+        opt_speed = self.calculate_opt_speed()
+        ffs = self.calculate_ffs()
+        jam_density = 150
 
+        # Van Aerde model coefficients
+        m = (2* opt_speed - ffs) / ((ffs - opt_speed)**2)
+        c2 = 1 / (jam_density * (m + 1/ffs))
+        c1 = m * c2
+        c3 = (1/opt_speed) * ((opt_speed/capacity) - c1 - c2/(ffs - opt_speed))
+
+        # create df for model calculations with first column with speed decreasing by 1 in each row
+        data = {'speed': [round(float(speed),2) for speed in np.arange(ffs, -0.01, -0.01)]}
+        df = pd.DataFrame(data)
+        df['density'] = round(1 / (c1 + c2/(ffs - df['speed']) + c3 * df['speed']), 2)
+        df['volume'] = round(df['speed'] * df['density'], 2)
+
+        return df
+
+    # def calculate_avg_speed(self):
+    #     avg_speed = 
+        
 
 
 
 
 
 # bs = BasicSection(road_class='A', access_points=5, speed_limit=120, area_type=1, adt=30000, hv_share = 0.1, profile='DASM', lanes=2, gradient=0.02, section_length=10)
-# bs = BasicSection(road_class='S', access_points=7, speed_limit=110, area_type=0, adt=120000, hv_share = 0.08, profile='DASD', lanes=3, gradient=0.03, section_length=10)
-bs = BasicSection(road_class='GPG', access_points=12, speed_limit=90, area_type=1, adt=60000, hv_share = 0.12, profile='DGPG', lanes=2, gradient=0.04, section_length=8)
+bs = BasicSection(road_class='S', access_points=7, speed_limit=110, area_type=0, adt=120000, hv_share = 0.08, profile='DASD', lanes=3, gradient=0.03, section_length=10)
+# bs = BasicSection(road_class='GPG', access_points=12, speed_limit=90, area_type=1, adt=60000, hv_share = 0.12, profile='DGPG', lanes=2, gradient=0.04, section_length=8)
 # bs = BasicSection(road_class='GPG', access_points=12, speed_limit=90, area_type=1, adt=6000, hv_share = 0.3, profile='DGPG', lanes=2, gradient=0.05, section_length=8)
 
-print(bs.calculate_opt_speed())
+print(bs.van_aerde_calculations())
