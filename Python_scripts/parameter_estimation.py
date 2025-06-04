@@ -4,7 +4,7 @@ import math
 
 class BasicSection:
     """
-    Class of functions to calculate traffic metrics at basic sections of dual-carriageway uninterrupted traffic facilities
+    Class of functions to calculate traffic metrics at basic section of dual-carriageway uninterrupted traffic facility
     """
     def __init__(self, road_class, access_points, speed_limit, area_type, adt, hv_share, 
                  profile, lanes, gradient=0, section_length=10):
@@ -80,7 +80,9 @@ class BasicSection:
         return round(k15, 2)
 
     def estimate_base_capacity(self):
-        
+        """
+        Calculates base capacity based on free flow speed (ffs). If ffs out-of-range for the method, lower or upper boundary is adopted.
+        """
         ffs = self.calculate_ffs()
         
         # assess capacity if ffs out-of-range
@@ -107,7 +109,9 @@ class BasicSection:
         return base_capacity
 
     def calculate_ew(self, est_util_rate=0.75):
-        
+        """
+        Calculates conversion factor for heavy vehicles share and vertical alignment.
+        """
         # set gradient category
         if self.gradient <= 0.02:
             max_gradient = 0.02
@@ -137,7 +141,9 @@ class BasicSection:
         return Ew
 
     def calculate_flow(self):
-
+        """
+        Calculates traffic flow at the section (expressed in light vehicles per hour per 1 lane)
+        """
         flow = round(self.calculate_hourly_volume()
                      * self.calculate_ew()
                      / (self.lanes * self.calculate_k15()))
@@ -151,6 +157,9 @@ class BasicSection:
         return flow
 
     def calculate_utilization(self):
+        """
+        Calculates utilization rate as a 'flow' to 'base capacity' rate
+        """
         util_rate = round(self.calculate_flow() / self.estimate_base_capacity(), 2)
         return util_rate
 
@@ -182,7 +191,11 @@ class BasicSection:
         return opt_speed
 
     def van_aerde_calculations(self):
-        
+        """
+        Returns data frame with Van Aerde model calculations with speed step 0.01.
+        Model parameters are adopted from capacity table and above calculations. 
+        Jam density is an empirical value adopted based on own research.
+        """
         # model parameters
         capacity = self.estimate_base_capacity()
         opt_speed = self.calculate_opt_speed()
@@ -204,40 +217,57 @@ class BasicSection:
         return df
 
     def calculate_avg_speed(self):
+        """
+        Calculates average speed at the flow if capacity is not exceeded.
+        
+        """
         # calculated only for uninterrupted flow
         opt_density = 26.5
 
         df_all_densitites = self.van_aerde_calculations()
         df = df_all_densitites[df_all_densitites['density'] <= opt_density]
 
-        # find the closest volume to flow in df['volume'] - method 1 from https://www.geeksforgeeks.org/finding-the-nearest-number-in-a-dataframe-using-pandas/  
-        flow = self.calculate_flow()
-        differences = np.abs(df['volume'] - flow)
-        nearest_index = differences.argsort()[0]
-
-        nearest_volume = float(df['volume'].iloc[nearest_index])
-
-        nearest_volume_row = df[df['volume'] == nearest_volume]
-        avg_speed = float(nearest_volume_row.iloc[0]['speed'])
-
-        return avg_speed
+        # find the closest volume to flow in df['volume'] 
+        # method 1 from https://www.geeksforgeeks.org/finding-the-nearest-number-in-a-dataframe-using-pandas/  
+        if self.calculate_utilization() <= 1:
+            flow = self.calculate_flow()
+            differences = np.abs(df['volume'] - flow)
+            nearest_index = differences.argsort()[0]
+            nearest_volume = float(df['volume'].iloc[nearest_index])
+            nearest_volume_row = df[df['volume'] == nearest_volume]
+            avg_speed = float(nearest_volume_row.iloc[0]['speed'])
+            return avg_speed
+        else:
+            print("Avg cannot be estimated because of exceeding the road capacity.\n" \
+            "The method can be applied only for uncongested traffic conditions.")
 
     def calculate_density(self):
-        density = round(self.calculate_flow() / self.calculate_avg_speed(), 1)
-        return density
+        """
+        Calculates density based on fundamental relationship of traffic flow (flow to avg speed) 
+        """
+        try:
+            density = round(self.calculate_flow() / self.calculate_avg_speed(), 1)
+            return density
+        except Exception:
+            print("Density cannot be calculated for congested traffic regime.")
 
     def assess_los(self):
+        """
+        Assesses the level of service based on density and boundaries defined in los_table
+        """
         df = self.los_table
         density = self.calculate_density()
         df['lane_density'] = pd.to_numeric(df['lane_density'])
-
-        for index, row in df.iterrows():
-            if density <= row['lane_density']:
-                return row['LOS']
+        try:
+            for index, row in df.iterrows():
+                if density <= row['lane_density']:
+                    return row['LOS']
+        except:
+            return "F"
 
 # bs = BasicSection(road_class='A', access_points=5, speed_limit=120, area_type=1, adt=30000, hv_share = 0.1, profile='DASM', lanes=2, gradient=0.02, section_length=10)
-# bs = BasicSection(road_class='S', access_points=7, speed_limit=110, area_type=0, adt=120000, hv_share = 0.08, profile='DASD', lanes=3, gradient=0.03, section_length=10)
+bs = BasicSection(road_class='S', access_points=7, speed_limit=110, area_type=0, adt=120000, hv_share = 0.08, profile='DASD', lanes=3, gradient=0.03, section_length=10)
 # bs = BasicSection(road_class='GPG', access_points=12, speed_limit=90, area_type=1, adt=60000, hv_share = 0.12, profile='DGPG', lanes=2, gradient=0.04, section_length=8)
 # bs = BasicSection(road_class='GPG', access_points=12, speed_limit=90, area_type=1, adt=6000, hv_share = 0.3, profile='DGPG', lanes=2, gradient=0.05, section_length=8)
 
-# print(bs.assess_los())
+print(bs.assess_los())
