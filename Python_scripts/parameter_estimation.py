@@ -203,17 +203,41 @@ class BasicSection:
 
         return df
 
-    # def calculate_avg_speed(self):
-    #     avg_speed = 
-        
+    def calculate_avg_speed(self):
+        # calculated only for uninterrupted flow
+        opt_density = 26.5
 
+        df_all_densitites = self.van_aerde_calculations()
+        df = df_all_densitites[df_all_densitites['density'] <= opt_density]
 
+        # find the closest volume to flow in df['volume'] - method 1 from https://www.geeksforgeeks.org/finding-the-nearest-number-in-a-dataframe-using-pandas/  
+        flow = self.calculate_flow()
+        differences = np.abs(df['volume'] - flow)
+        nearest_index = differences.argsort()[0]
 
+        nearest_volume = float(df['volume'].iloc[nearest_index])
 
+        nearest_volume_row = df[df['volume'] == nearest_volume]
+        avg_speed = float(nearest_volume_row.iloc[0]['speed'])
+
+        return avg_speed
+
+    def calculate_density(self):
+        density = round(self.calculate_flow() / self.calculate_avg_speed(), 1)
+        return density
+
+    def assess_los(self):
+        df = self.los_table
+        density = self.calculate_density()
+        df['lane_density'] = pd.to_numeric(df['lane_density'])
+
+        for index, row in df.iterrows():
+            if density <= row['lane_density']:
+                return row['LOS']
 
 # bs = BasicSection(road_class='A', access_points=5, speed_limit=120, area_type=1, adt=30000, hv_share = 0.1, profile='DASM', lanes=2, gradient=0.02, section_length=10)
-bs = BasicSection(road_class='S', access_points=7, speed_limit=110, area_type=0, adt=120000, hv_share = 0.08, profile='DASD', lanes=3, gradient=0.03, section_length=10)
+# bs = BasicSection(road_class='S', access_points=7, speed_limit=110, area_type=0, adt=120000, hv_share = 0.08, profile='DASD', lanes=3, gradient=0.03, section_length=10)
 # bs = BasicSection(road_class='GPG', access_points=12, speed_limit=90, area_type=1, adt=60000, hv_share = 0.12, profile='DGPG', lanes=2, gradient=0.04, section_length=8)
 # bs = BasicSection(road_class='GPG', access_points=12, speed_limit=90, area_type=1, adt=6000, hv_share = 0.3, profile='DGPG', lanes=2, gradient=0.05, section_length=8)
 
-print(bs.van_aerde_calculations())
+# print(bs.assess_los())
