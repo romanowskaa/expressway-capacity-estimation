@@ -1,5 +1,5 @@
 import pytest
-from Python_scripts.parameter_estimation import BasicSection
+from Python_scripts.backend import BasicSection
 
 class TestBasicSection:
 
