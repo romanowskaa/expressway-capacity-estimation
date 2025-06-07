@@ -1,6 +1,7 @@
 import streamlit as st
-from backend import BasicSection as bs
+from backend import BasicSection
 import plotly.express as px
+import plotly.graph_objects as go
 
 # page config
 st.set_page_config(
@@ -29,16 +30,69 @@ with st.sidebar:
     lanes_list = [2, 3]
     lanes = st.selectbox('No. of lanes', lanes_list)
 
-bs = bs(road_class='A', access_points=access_points, speed_limit=speed_limit, area_type=1, adt=adt, hv_share=hv_share, profile='DASM', lanes=lanes, gradient=0.02, section_length=10)
+col = st.columns((1.5, 6.5, 1.5), gap='medium')
+
+bs = BasicSection(road_class='A', access_points=access_points, speed_limit=speed_limit, area_type=1, adt=adt, hv_share=hv_share, profile='DASM', lanes=lanes, gradient=0.02, section_length=10)
 df = bs.van_aerde_calculations()
+df = df[df['density'] <= 26.5]
 
+with col[0]:
+    avg_speed = round(bs.calculate_avg_speed(), 1)
+    ffs_speed = bs.calculate_ffs()
+    hourly_flow = bs.calculate_flow()
+    base_capacity = bs.estimate_base_capacity()
+    real_capacity = round(base_capacity * lanes * bs.calculate_k15() / bs.calculate_ew())
+    
+    st.markdown('###### Traffic metrics')
 
+    st.metric(label='Traffic volume [veh/h]',
+              value=bs.calculate_hourly_volume())
+    
+    st.metric(label='Cross-section capacity [veh/h]',
+              value=real_capacity)
+    
+    st.metric(label='Capacity utilization', 
+              value=f"{round(100*hourly_flow/base_capacity, 1)}%")
+    
+    st.divider()
 
-df_trafficx = df['volume']
-df_trafficy = df['speed']
+    st.metric(label='Traffic flow [pc/h/lane]', 
+              value=f"{hourly_flow}")
 
-scat_plot = px.scatter(df, x=df_trafficx, y=df_trafficy)
-scat_plot.update_layout(title='Relationship between traffic parameters and weather', 
-                                yaxis=dict(title='', range=[0, 150]), 
-                                xaxis=dict(title='', range=[0, 2500]))
-st.plotly_chart(scat_plot)
+    st.metric(label='Base capacity [pc/h/lane]',
+              value=base_capacity)
+    
+with col[2]: 
+    st.markdown('###### Traffic conditions')
+    
+    st.metric(label='Avg speed [km/h]', 
+              value=f"{avg_speed}",
+              delta=f"{round(100*(avg_speed - ffs_speed)/ffs_speed,1)}% to FFS")
+    
+    st.metric(label='Level of Service',
+              value=f"{bs.assess_los()}", border=True)
+
+with col[1]:
+
+    
+    df_trafficx = df['volume']
+    df_trafficy = df['speed']
+
+    scat_plot = px.scatter(df, x=df_trafficx, y=df_trafficy)
+
+    scat_plot.update_layout(title='Flow-speed relationship', 
+                                    yaxis=dict(title='', range=[0, 150]),
+                                    xaxis=dict(title='', range=[0, 2500]))
+    
+    scat_plot.update_layout()
+
+    scat_plot.add_trace(go.Scattergl(x=[hourly_flow], y=[avg_speed], mode='markers', 
+                                   marker=dict(size=20, color='red', symbol='circle'),
+                                   showlegend=False,
+
+                                   )
+                        )
+
+    # scat_plot.update_layout(hovermode="x")
+
+    st.plotly_chart(scat_plot)
