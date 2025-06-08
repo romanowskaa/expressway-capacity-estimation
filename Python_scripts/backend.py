@@ -265,9 +265,38 @@ class BasicSection:
         except:
             return "F"
 
-# bs = BasicSection(road_class='A', access_points=5, speed_limit=120, area_type=1, adt=30000, hv_share = 0.1, profile='DASM', lanes=2, gradient=0.02, section_length=10)
+    def extract_los_density(self):
+        """
+        Returns LOS critical density
+        """
+        df = self.los_table
+        density = float(df[df['LOS'] == self.assess_los()]['lane_density'])
+        return density
+
+    def calculate_metrics_at_density(self, density):
+        """
+        Calculates speed and flow at given density
+        :param: density(float): lane density expressed in pc/km/lane
+        """
+        df = self.van_aerde_calculations()
+        differences = np.abs(df['density'] - density)
+        nearest_index = differences.argsort()[0]
+        nearest_density = float(df['density'].iloc[nearest_index])
+        nearest_density_row = df[df['density'] == nearest_density]
+        speed = float(nearest_density_row.iloc[0]['speed'])
+        flow = float(nearest_density_row.iloc[0]['volume'])
+        return speed, flow
+    
+
+
+
+
+bs = BasicSection(road_class='A', access_points=5, speed_limit=120, area_type=1, adt=30000, hv_share = 0.1, profile='DASM', lanes=2, gradient=0.02, section_length=10)
 # bs = BasicSection(road_class='S', access_points=7, speed_limit=110, area_type=0, adt=120000, hv_share = 0.08, profile='DASD', lanes=3, gradient=0.03, section_length=10)
 # bs = BasicSection(road_class='GPG', access_points=12, speed_limit=90, area_type=1, adt=60000, hv_share = 0.12, profile='DGPG', lanes=2, gradient=0.04, section_length=8)
 # bs = BasicSection(road_class='GPG', access_points=12, speed_limit=90, area_type=1, adt=6000, hv_share = 0.3, profile='DGPG', lanes=2, gradient=0.05, section_length=8)
 
-# print(bs.assess_los())
+print(bs.extract_los_density())
+
+# speed, flow = bs.calculate_metrics_at_density(6.5)
+# print(speed, flow)  # Output: John 25

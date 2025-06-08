@@ -42,6 +42,8 @@ with col[0]:
     hourly_flow = bs.calculate_flow()
     base_capacity = bs.estimate_base_capacity()
     real_capacity = round(base_capacity * lanes * bs.calculate_k15() / bs.calculate_ew())
+    next_critical_flow = bs.calculate_metrics_at_density(bs.extract_los_density())[1]
+    next_critical_volume = round(next_critical_flow * lanes * bs.calculate_k15() / bs.calculate_ew())
     
     st.markdown('###### Traffic metrics')
 
@@ -54,7 +56,12 @@ with col[0]:
     st.metric(label='Capacity utilization', 
               value=f"{round(100*hourly_flow/base_capacity, 1)}%")
     
+    st.metric(label='Volume to next LOS [veh/h]',
+              value=f"{round(next_critical_volume - bs.calculate_hourly_volume())}")
+    
     st.divider()
+
+    st.markdown('###### Calculated flows')
 
     st.metric(label='Traffic flow [pc/h/lane]', 
               value=f"{hourly_flow}")
@@ -69,6 +76,9 @@ with col[2]:
               value=f"{avg_speed}",
               delta=f"{round(100*(avg_speed - ffs_speed)/ffs_speed,1)}% to FFS")
     
+    st.metric(label='Density [pc/km/lane]', 
+              value=f"{round(hourly_flow/avg_speed, 1)}")
+    
     st.metric(label='Level of Service',
               value=f"{bs.assess_los()}", border=True)
 
@@ -78,21 +88,87 @@ with col[1]:
     df_trafficx = df['volume']
     df_trafficy = df['speed']
 
-    scat_plot = px.scatter(df, x=df_trafficx, y=df_trafficy)
+    scat_plot = px.line(df, x=df_trafficx, y=df_trafficy)
 
     scat_plot.update_layout(title='Flow-speed relationship', 
-                                    yaxis=dict(title='', range=[0, 150]),
-                                    xaxis=dict(title='', range=[0, 2500]))
+                                    yaxis=dict(title='Avg speed [km/h]', range=[0, 150]),
+                                    xaxis=dict(title='Traffic flow [pc/h/lane]', range=[0, 2500]))
     
     scat_plot.update_layout()
 
     scat_plot.add_trace(go.Scattergl(x=[hourly_flow], y=[avg_speed], mode='markers', 
-                                   marker=dict(size=20, color='red', symbol='circle'),
+                                   marker=dict(size=12, color='white', symbol='circle', line=dict(width=2,
+                                        color='DarkSlateGrey')),
                                    showlegend=False,
-
                                    )
                         )
+    
+    # line plot at densities corresponding to LOS boundaries
+    scat_plot.add_trace(go.Scatter(x=[0, bs.calculate_metrics_at_density(6.5)[1]], 
+                                   y=[0, bs.calculate_metrics_at_density(6.5)[0]], 
+                                   mode='markers+lines', 
+                                   opacity=0.5, name='costam',
+                                   showlegend=False, 
+                                   line=dict(color='royalblue', width=1, dash='dot')))
+    scat_plot.add_trace(go.Scatter(x=[0, bs.calculate_metrics_at_density(11)[1]], 
+                                   y=[0, bs.calculate_metrics_at_density(11)[0]], 
+                                   mode='markers+lines', 
+                                   opacity=0.5, name='costam',
+                                   showlegend=False, 
+                                   line=dict(color='royalblue', width=1, dash='dot')))
+    scat_plot.add_trace(go.Scatter(x=[0, bs.calculate_metrics_at_density(16)[1]], 
+                                   y=[0, bs.calculate_metrics_at_density(16)[0]], 
+                                   mode='markers+lines', 
+                                   opacity=0.5, name='costam',
+                                   showlegend=False, 
+                                   line=dict(color='royalblue', width=1, dash='dot')))
+    scat_plot.add_trace(go.Scatter(x=[0, bs.calculate_metrics_at_density(21)[1]], 
+                                   y=[0, bs.calculate_metrics_at_density(21)[0]], 
+                                   mode='markers+lines', 
+                                   opacity=0.5, name='costam',
+                                   showlegend=False, 
+                                   line=dict(color='royalblue', width=1, dash='dot')))
+    scat_plot.add_trace(go.Scatter(x=[0, bs.calculate_metrics_at_density(26.5)[1]], 
+                                   y=[0, bs.calculate_metrics_at_density(26.5)[0]], 
+                                   mode='markers+lines', 
+                                   opacity=0.5, name='costam',
+                                   showlegend=False, 
+                                   line=dict(color='royalblue', width=1, dash='dot')))
+    
+    scat_plot.add_annotation(
+        x=hourly_flow, y=avg_speed,
+        text=f"Predicted traffic state",
+        showarrow=True,
+        arrowhead=2)
 
-    # scat_plot.update_layout(hovermode="x")
-
+    scat_plot.add_annotation(
+        x=bs.calculate_metrics_at_density(6.5)[1] - 350, y=bs.calculate_metrics_at_density(6.5)[0] - 10,
+        text=f"LOS A",
+        align='left',
+        showarrow=False)
+    scat_plot.add_annotation(
+        x=bs.calculate_metrics_at_density(11)[1] - 350, y=bs.calculate_metrics_at_density(11)[0] - 10,
+        text=f"LOS B",
+        align='left',
+        showarrow=False)
+    scat_plot.add_annotation(
+        x=bs.calculate_metrics_at_density(16)[1] - 350, y=bs.calculate_metrics_at_density(16)[0] - 10,
+        text=f"LOS C",
+        align='left',
+        showarrow=False)
+    scat_plot.add_annotation(
+        x=bs.calculate_metrics_at_density(21)[1] - 350, y=bs.calculate_metrics_at_density(21)[0] - 5,
+        text=f"LOS D",
+        align='left',
+        showarrow=False)
+    scat_plot.add_annotation(
+        x=bs.calculate_metrics_at_density(26.5)[1] - 200, y=bs.calculate_metrics_at_density(26.5)[0],
+        text=f"LOS E",
+        align='left',
+        showarrow=False)
+    scat_plot.add_annotation(
+        x=bs.calculate_metrics_at_density(26.5)[1] - 200, y=bs.calculate_metrics_at_density(26.5)[0] - 20,
+        text=f"LOS F",
+        align='left',
+        showarrow=False)
     st.plotly_chart(scat_plot)
