@@ -55,12 +55,18 @@ class BasicSection:
         
         return ffs
     
+    def define_u50(self):
+        u50_row = self.u50_table[(self.u50_table['Profile'] == self.profile) & (self.u50_table['ADT_min'] <= self.adt) & (self.u50_table['ADT_max'] >= self.adt)]
+        u50 = float(u50_row.iloc[0]['u50'])
+        return u50
+    
     def calculate_hourly_volume(self):
         """
         Calculates hourly traffic volume (in one direction) from annual average daily traffic (ADT) based on u50 factor.
         """
-        u50_row = self.u50_table[(self.u50_table['Profile'] == self.profile) & (self.u50_table['ADT_min'] <= self.adt) & (self.u50_table['ADT_max'] >= self.adt)]
-        u50 = float(u50_row.iloc[0]['u50'])
+        # u50_row = self.u50_table[(self.u50_table['Profile'] == self.profile) & (self.u50_table['ADT_min'] <= self.adt) & (self.u50_table['ADT_max'] >= self.adt)]
+        # u50 = float(u50_row.iloc[0]['u50'])
+        u50 = self.define_u50()
         volume = int(self.adt * u50 / 2)
         
         return volume 
@@ -237,9 +243,17 @@ class BasicSection:
             nearest_volume_row = df[df['volume'] == nearest_volume]
             avg_speed = float(nearest_volume_row.iloc[0]['speed'])
             return avg_speed
-        else:
-            print("Avg cannot be estimated because of exceeding the road capacity.\n" \
-            "The method can be applied only for uncongested traffic conditions.")
+        else:           #### exception when LOS F!!!!!!!!!!!!!!!
+            # print("Avg cannot be estimated because of exceeding the road capacity.\n" \
+            # "The method can be applied only for uncongested traffic conditions.")
+            df = df_all_densitites[df_all_densitites['density'] > opt_density]
+            flow = self.calculate_flow()
+            differences = np.abs(df['volume'] - flow)
+            nearest_index = differences.argsort()[0]
+            nearest_volume = float(df['volume'].iloc[nearest_index])
+            nearest_volume_row = df[df['volume'] == nearest_volume]
+            avg_speed = float(nearest_volume_row.iloc[0]['speed'])
+            return avg_speed
 
     def calculate_density(self):
         """
@@ -289,14 +303,12 @@ class BasicSection:
     
 
 
+# bs = BasicSection(road_class='A', access_points=5, speed_limit=120, area_type=1, adt=30000, hv_share = 0.1, profile='DASM', lanes=2, gradient=0.02, section_length=10)
+# # bs = BasicSection(road_class='S', access_points=7, speed_limit=110, area_type=0, adt=120000, hv_share = 0.08, profile='DASD', lanes=3, gradient=0.03, section_length=10)
+# # bs = BasicSection(road_class='GPG', access_points=12, speed_limit=90, area_type=1, adt=60000, hv_share = 0.12, profile='DGPG', lanes=2, gradient=0.04, section_length=8)
+# # bs = BasicSection(road_class='GPG', access_points=12, speed_limit=90, area_type=1, adt=6000, hv_share = 0.3, profile='DGPG', lanes=2, gradient=0.05, section_length=8)
 
-
-bs = BasicSection(road_class='A', access_points=5, speed_limit=120, area_type=1, adt=30000, hv_share = 0.1, profile='DASM', lanes=2, gradient=0.02, section_length=10)
-# bs = BasicSection(road_class='S', access_points=7, speed_limit=110, area_type=0, adt=120000, hv_share = 0.08, profile='DASD', lanes=3, gradient=0.03, section_length=10)
-# bs = BasicSection(road_class='GPG', access_points=12, speed_limit=90, area_type=1, adt=60000, hv_share = 0.12, profile='DGPG', lanes=2, gradient=0.04, section_length=8)
-# bs = BasicSection(road_class='GPG', access_points=12, speed_limit=90, area_type=1, adt=6000, hv_share = 0.3, profile='DGPG', lanes=2, gradient=0.05, section_length=8)
-
-print(bs.extract_los_density())
+# print(bs.extract_los_density())
 
 # speed, flow = bs.calculate_metrics_at_density(6.5)
 # print(speed, flow)  # Output: John 25

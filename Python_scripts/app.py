@@ -2,6 +2,7 @@ import streamlit as st
 from backend import BasicSection
 import plotly.express as px
 import plotly.graph_objects as go
+import pandas as pd
 
 # page config
 st.set_page_config(
@@ -15,24 +16,41 @@ st.set_page_config(
 with st.sidebar:
     st.subheader(':oncoming_automobile: Select options:')
 
-    road_classes = ['A', 'S', 'GPG']
-    road_class = st.selectbox('Road class', road_classes)
+    road_classes = ["A", "S", "GPG"]
+    road_classes_display = {'A': 'Motorway', 'S': 'Express road', 'GPG': 'Main road'}
+    road_class = st.selectbox('Road class', road_classes, format_func=lambda x: road_classes_display.get(x, str(x)))
+
     speed_limits = [80, 90, 100, 110, 120, 130, 140]
     speed_limit = st.selectbox('Speed limit', speed_limits)
     access_points = st.number_input('No of access points', min_value=0, max_value=30, value=0, step=1, 
                                     help='Some help')
-    area_types = ['rural', 'agglomeration']
-    area_type = st.selectbox('Area type', area_types)
+    area_types = [0, 1]
+    area_types_display = {0: 'agglomeration', 1: 'rural'}
+    area_type = st.selectbox('Area type', area_types, format_func=lambda x: area_types_display.get(x, str(x)))
     adt = st.number_input('ADT', min_value=0, max_value=300000, value=30000, step=1000, 
-                                    help='Some help')
+                                    help='Input annual traffic volume at road cross-section')
     hv_share = st.number_input('HV share', min_value=0.0, max_value=1.0, value=0.0, step=0.01, 
                                     help='Some help')
     lanes_list = [2, 3]
     lanes = st.selectbox('No. of lanes', lanes_list)
 
+    if road_class == 'GPG':
+        profiles = ['DGPG']
+    else:
+        profiles = ['DASM', 'DASS', 'DASD']
+    profiles_display = {'DGPG': 'Low', 'DASM': 'Low', 'DASS': 'Medium', 'DASD': 'High'}
+    profile = st.selectbox('Seasonal traffic variations', profiles, format_func=lambda x: profiles_display.get(x, str(x)))
+
+    gradients = [0.02, 0.03, 0.04, 0.05]
+    gradients_display = {0.02: 'up to 2%', 0.03: '3%', 0.04: '4%', 0.05: '5% and more'}
+    gradient = st.selectbox('Longitudinal gradient', gradients, format_func=lambda x: gradients_display.get(x, str(x)))
+
+    section_length = st.number_input('Section length', min_value=0, max_value=50, value=10, step=1, 
+                                    help='Input annual traffic volume at road cross-section')
+
 col = st.columns((1.5, 6.5, 1.5), gap='medium')
 
-bs = BasicSection(road_class='A', access_points=access_points, speed_limit=speed_limit, area_type=1, adt=adt, hv_share=hv_share, profile='DASM', lanes=lanes, gradient=0.02, section_length=10)
+bs = BasicSection(road_class=road_class, access_points=access_points, speed_limit=speed_limit, area_type=area_type, adt=adt, hv_share=hv_share, profile=profile, lanes=lanes, gradient=gradient, section_length=section_length)
 df = bs.van_aerde_calculations()
 df = df[df['density'] <= 26.5]
 
@@ -42,9 +60,11 @@ with col[0]:
     hourly_flow = bs.calculate_flow()
     base_capacity = bs.estimate_base_capacity()
     real_capacity = round(base_capacity * lanes * bs.calculate_k15() / bs.calculate_ew())
-    next_critical_flow = bs.calculate_metrics_at_density(bs.extract_los_density())[1]
-    next_critical_volume = round(next_critical_flow * lanes * bs.calculate_k15() / bs.calculate_ew())
-    
+    try:
+        next_critical_flow = bs.calculate_metrics_at_density(bs.extract_los_density())[1]
+        next_critical_volume = round(next_critical_flow * lanes * bs.calculate_k15() / bs.calculate_ew())
+    except:
+        next_critical_volume=0
     st.markdown('###### Traffic metrics')
 
     st.metric(label='Traffic volume [veh/h]',
@@ -172,3 +192,31 @@ with col[1]:
         align='left',
         showarrow=False)
     st.plotly_chart(scat_plot)
+
+    ### table with critical densities
+    st.markdown('###### Critical traffic flow [pc/h/lane]')
+   
+    df_crit_flow = pd.DataFrame(
+        {
+        "PSR A": [round(bs.calculate_metrics_at_density(6.5)[1])],
+        "PSR B": [round(bs.calculate_metrics_at_density(11)[1])],
+        "PSR C": [round(bs.calculate_metrics_at_density(16)[1])],
+        "PSR D": [round(bs.calculate_metrics_at_density(21)[1])],
+        "PSR E": [round(bs.calculate_metrics_at_density(26.5)[1])],
+        }
+    )
+    st.dataframe(df_crit_flow, hide_index=True)
+
+    ### table with critical ADTs
+    st.markdown('###### Critical road cross-sectional ADT [pc/24h]')
+   
+    df_crit_adt = pd.DataFrame(
+        {
+        "PSR A": [round(2* lanes * bs.calculate_metrics_at_density(6.5)[1]/bs.define_u50(), -3)],
+        "PSR B": [round(2* lanes * bs.calculate_metrics_at_density(11)[1]/bs.define_u50(), -3)],
+        "PSR C": [round(2* lanes * bs.calculate_metrics_at_density(16)[1]/bs.define_u50(), -3)],
+        "PSR D": [round(2* lanes * bs.calculate_metrics_at_density(21)[1]/bs.define_u50(), -3)],
+        "PSR E": [round(2* lanes * bs.calculate_metrics_at_density(26.5)[1]/bs.define_u50(), -3)],
+        }
+    )
+    st.dataframe(df_crit_adt, hide_index=True)
