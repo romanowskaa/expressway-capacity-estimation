@@ -27,7 +27,7 @@ with st.sidebar:
     area_types = [0, 1]
     area_types_display = {0: 'agglomeration', 1: 'rural'}
     area_type = st.selectbox('Area type', area_types, format_func=lambda x: area_types_display.get(x, str(x)))
-    adt = st.number_input('ADT', min_value=0, max_value=300000, value=30000, step=1000, 
+    adt = st.slider('ADT', min_value=0, max_value=300000, value=30000, step=1000, 
                                     help='Input annual traffic volume at road cross-section')
     hv_share = st.number_input('HV share', min_value=0.0, max_value=1.0, value=0.0, step=0.01, 
                                     help='Some help')
