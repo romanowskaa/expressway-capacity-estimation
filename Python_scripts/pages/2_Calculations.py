@@ -14,47 +14,68 @@ st.set_page_config(
 
 # sidebar
 with st.sidebar:
-    st.subheader(':oncoming_automobile: Select options:')
+    st.subheader(':oncoming_automobile: Input data')
 
     road_classes = ["A", "S", "GPG"]
     road_classes_display = {'A': 'Motorway', 'S': 'Express road', 'GPG': 'Main road'}
-    road_class = st.selectbox('Road class', road_classes, format_func=lambda x: road_classes_display.get(x, str(x)))
+    road_class = st.selectbox(':small_blue_diamond: Road class', road_classes, format_func=lambda x: road_classes_display.get(x, str(x)))
 
     speed_limits = [80, 90, 100, 110, 120, 130, 140]
-    speed_limit = st.selectbox('Speed limit', speed_limits)
-    access_points = st.number_input('No of access points', min_value=0, max_value=30, value=0, step=1, 
-                                    help='Some help')
+    speed_limit = st.selectbox(':small_blue_diamond: Speed limit', speed_limits)
+
     area_types = [0, 1]
     area_types_display = {0: 'agglomeration', 1: 'rural'}
-    area_type = st.selectbox('Area type', area_types, format_func=lambda x: area_types_display.get(x, str(x)))
-    adt = st.slider('ADT', min_value=0, max_value=300000, value=30000, step=1000, 
-                                    help='Input annual traffic volume at road cross-section')
-    hv_share = st.number_input('HV share', min_value=0.0, max_value=1.0, value=0.0, step=0.01, 
-                                    help='Some help')
+    area_type = st.selectbox(':small_blue_diamond: Area type', area_types, format_func=lambda x: area_types_display.get(x, str(x)))
+    
     lanes_list = [2, 3]
-    lanes = st.selectbox('No. of lanes', lanes_list)
-
-    if road_class == 'GPG':
-        profiles = ['DGPG']
-    else:
-        profiles = ['DASM', 'DASS', 'DASD']
-    profiles_display = {'DGPG': 'Low', 'DASM': 'Low', 'DASS': 'Medium', 'DASD': 'High'}
-    profile = st.selectbox('Seasonal traffic variations', profiles, format_func=lambda x: profiles_display.get(x, str(x)))
+    lanes = st.selectbox(':small_blue_diamond: No. of lanes', lanes_list)
 
     gradients = [0.02, 0.03, 0.04, 0.05]
     gradients_display = {0.02: 'up to 2%', 0.03: '3%', 0.04: '4%', 0.05: '5% and more'}
-    gradient = st.selectbox('Longitudinal gradient', gradients, format_func=lambda x: gradients_display.get(x, str(x)))
+    gradient = st.selectbox(':small_blue_diamond: Longitudinal gradient', gradients, format_func=lambda x: gradients_display.get(x, str(x)))
 
-    section_length = st.number_input('Section length', min_value=0, max_value=50, value=10, step=1, 
+    access_points = st.number_input(':small_blue_diamond: No of access points', min_value=0, max_value=30, value=0, step=1, 
+                                    help='Some help')
+    section_length = st.number_input(':small_blue_diamond: Section length', min_value=0, max_value=50, value=10, step=1, 
                                     help='Input annual traffic volume at road cross-section')
+    
+    volume_type = st.selectbox(':small_blue_diamond: Input volume', ['ADT', 'hourly volume'])
+    if volume_type == 'ADT':
+        adt = st.slider(':small_blue_diamond: ADT', min_value=0, max_value=300000, value=30000, step=1000, 
+                            help='Input annual traffic volume at road cross-section', label_visibility='hidden')
+        if road_class == 'GPG':
+            profiles = ['DGPG']
+        else:
+            profiles = ['DASM', 'DASS', 'DASD']
+            profiles_display = {'DGPG': 'Low', 'DASM': 'Low', 'DASS': 'Medium', 'DASD': 'High'}
+            profile = st.selectbox(':small_blue_diamond: Seasonal traffic variations', profiles, format_func=lambda x: profiles_display.get(x, str(x)))
+    else:
+        input_hourly_volume = st.slider('Hourly traffic', min_value=0, value=1000, step=100, max_value=10000, label_visibility='hidden')
+        adt = int(2 * input_hourly_volume / 0.095)
+        profile = 'DGPG'
+    
+    hv_share = st.number_input(':small_blue_diamond: HV share', min_value=0.0, max_value=1.0, value=0.0, step=0.01, 
+                                    help='Some help')
+
+
+
 
 col = st.columns((1.5, 6.5, 1.5), gap='medium')
 
 bs = BasicSection(road_class=road_class, access_points=access_points, speed_limit=speed_limit, area_type=area_type, adt=adt, hv_share=hv_share, profile=profile, lanes=lanes, gradient=gradient, section_length=section_length)
+
+if volume_type != 'ADT':
+    adt_from_volume = bs.calculate_adt_from_volume(input_hourly_volume)
+    bs = BasicSection(road_class=road_class, access_points=access_points, speed_limit=speed_limit, area_type=area_type, adt=adt_from_volume, hv_share=hv_share, profile=profile, lanes=lanes, gradient=gradient, section_length=section_length)
+
 df = bs.van_aerde_calculations()
 df = df[df['density'] <= 26.5]
 
 with col[0]:
+    if volume_type == 'ADT':
+        hourly_volume = bs.calculate_hourly_volume()
+    else:
+        hourly_volume = input_hourly_volume
     if bs.calculate_avg_speed() != None:
         avg_speed = round(bs.calculate_avg_speed(), 1)
     ffs_speed = bs.calculate_ffs()
@@ -65,7 +86,7 @@ with col[0]:
     st.markdown('###### Traffic metrics')
 
     st.metric(label='Traffic volume [veh/h]',
-              value=bs.calculate_hourly_volume())
+              value=hourly_volume)
     
     st.metric(label='Cross-section capacity [veh/h]',
               value=real_capacity)
@@ -77,8 +98,6 @@ with col[0]:
     st.divider()
 
     st.markdown('###### Calculated flows')
-
-    # st.metric(label='Av. daily flow [pc/h]', value=round(adt*bs.calculate_ew()/bs.calculate_k15()))
 
     st.metric(label='Traffic flow [pc/h/lane]', 
               value=f"{hourly_flow}")

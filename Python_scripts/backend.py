@@ -69,6 +69,11 @@ class BasicSection:
         
         return volume 
     
+    def calculate_adt_from_volume(self, input_volume):
+        calculated_adt = int(input_volume * 2 / self.define_u50())
+        
+        return calculated_adt
+
     def calculate_k15(self):
         """
         Calculates k15 factor, based on hourly traffic volume.
@@ -242,16 +247,6 @@ class BasicSection:
             avg_speed = float(nearest_volume_row.iloc[0]['speed'])
             return avg_speed
         else:           #### exception when LOS F!!!!!!!!!!!!!!!
-            # print("Avg cannot be estimated because of exceeding the road capacity.\n" \
-            # "The method can be applied only for uncongested traffic conditions.")
-            # df = df_all_densitites[df_all_densitites['density'] > opt_density]
-            # flow = self.calculate_flow()
-            # differences = np.abs(df['volume'] - flow)
-            # nearest_index = differences.argsort()[0]
-            # nearest_volume = float(df['volume'].iloc[nearest_index])
-            # nearest_volume_row = df[df['volume'] == nearest_volume]
-            # avg_speed = float(nearest_volume_row.iloc[0]['speed'])
-            # return avg_speed
             return None
 
     def calculate_density(self):
