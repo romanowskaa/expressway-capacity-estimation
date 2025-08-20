@@ -7,9 +7,9 @@ class BasicSection:
     Class of functions to calculate traffic metrics at basic section of dual-carriageway uninterrupted traffic facility
     """
     def __init__(self, road_class, access_points, speed_limit, area_type, adt, hv_share, 
-                 profile, lanes, gradient=0, section_length=10):
+                 profile, lanes, gradient=0):
         self.road_class = road_class
-        self.access_points = access_points
+        self.access_points = access_points      # means the density of access points (number of access points per 10 kms)
         self.speed_limit = speed_limit
         self.area_type = area_type
         self.adt = adt
@@ -17,20 +17,13 @@ class BasicSection:
         self.profile = profile
         self.lanes = lanes
         self.gradient = gradient
-        self.section_length = section_length
+        # self.section_length = section_length
 
         # load dfs from csv files
         self.u50_table = pd.read_csv('data_tables\\u50.csv')
         self.ew_table = pd.read_csv('data_tables\\ew_rate.csv')
         self.los_table = pd.read_csv('data_tables\\psr_bound.csv')
         self.capacity_table = pd.read_csv('data_tables\\capacity.csv')
-
-
-    def calculate_access_point_density(self):
-        """
-        Calculates the density of access points given in number per 10 km section, 5 km upstream and 5 km downstream from the cross-section analysed.
-        """
-        return round(self.access_points / self.section_length, 2)
     
     def calculate_ffs(self):
         """
@@ -39,20 +32,41 @@ class BasicSection:
 
         if self.road_class == 'A':
             ffs = round(82.2 
-            - 10.7 * self.calculate_access_point_density()
+            # - 10.7 * self.calculate_access_point_density()
+            - 10.7 * self.access_points
             + 7.7 * self.area_type
             + 0.334 * self.speed_limit)
         elif self.road_class == 'S':
             ffs = round(83.5 
-            - 10.7 * self.calculate_access_point_density()
+            # - 10.7 * self.calculate_access_point_density()
+            - 10.7 * self.access_points
             + 7.7 * self.area_type
             + 0.334 * self.speed_limit)
         else:
             ffs = round(80.5 
-            - 10.7 * self.calculate_access_point_density()
+            # - 10.7 * self.calculate_access_point_density()
+            - 10.7 * self.access_points
             + 7.7 * self.area_type
             + 0.334 * self.speed_limit)
         
+
+        # if ffs out-of-range apply the closest value in the range
+        if self.road_class == 'A':
+            if ffs > 130:
+                ffs = 130
+            elif ffs < 90:
+                ffs = 90
+        elif self.road_class == 'S':
+            if ffs > 120:
+                ffs = 120
+            elif ffs < 90:
+                ffs = 90
+        else:
+            if ffs > 110:
+                ffs = 110
+            elif ffs < 80:
+                ffs = 80
+
         return ffs
     
     def define_u50(self):
@@ -93,24 +107,6 @@ class BasicSection:
         Calculates base capacity based on free flow speed (ffs). If ffs out-of-range for the method, lower or upper boundary is adopted.
         """
         ffs = self.calculate_ffs()
-        
-        # assess capacity if ffs out-of-range
-        if self.road_class == 'A':
-            if ffs > 130:
-                ffs = 130
-            elif ffs < 90:
-                ffs = 90
-        elif self.road_class == 'S':
-            if ffs > 120:
-                ffs = 120
-            elif ffs < 90:
-                ffs = 90
-        else:
-            if ffs > 110:
-                ffs = 110
-            elif ffs < 80:
-                ffs = 80
-        
         df = self.capacity_table
         cap_row = df[(df['ffs'] == ffs) & (df['road_class'] == self.road_class)]
         base_capacity = int(cap_row.iloc[0]['base_capacity'])
@@ -175,24 +171,6 @@ class BasicSection:
     def calculate_opt_speed(self):
 
         ffs = self.calculate_ffs()
-        
-        # assess opt_speed if ffs out-of-range
-        if self.road_class == 'A':
-            if ffs > 130:
-                ffs = 130
-            elif ffs < 90:
-                ffs = 90
-        elif self.road_class == 'S':
-            if ffs > 120:
-                ffs = 120
-            elif ffs < 90:
-                ffs = 90
-        else:
-            if ffs > 110:
-                ffs = 110
-            elif ffs < 80:
-                ffs = 80
-        
         df = self.capacity_table
         opt_speed_row = df[(df['ffs'] == ffs) & (df['road_class'] == self.road_class)]
         opt_speed = float(opt_speed_row.iloc[0]['opt_speed'])
@@ -202,24 +180,6 @@ class BasicSection:
     def calculate_jam_density(self):
 
         ffs = self.calculate_ffs()
-        
-        # assess jam_density if ffs out-of-range
-        if self.road_class == 'A':
-            if ffs > 130:
-                ffs = 130
-            elif ffs < 90:
-                ffs = 90
-        elif self.road_class == 'S':
-            if ffs > 120:
-                ffs = 120
-            elif ffs < 90:
-                ffs = 90
-        else:
-            if ffs > 110:
-                ffs = 110
-            elif ffs < 80:
-                ffs = 80
-        
         df = self.capacity_table
         jam_density_row = df[(df['ffs'] == ffs) & (df['road_class'] == self.road_class)]
         jam_density = float(jam_density_row.iloc[0]['jam_density'])
@@ -324,12 +284,9 @@ class BasicSection:
     
 
 
-bs = BasicSection(road_class='A', access_points=2, speed_limit=140, area_type=1, adt=30000, hv_share = 0.1, profile='DASM', lanes=3, gradient=0.02, section_length=10)
-# # bs = BasicSection(road_class='S', access_points=7, speed_limit=110, area_type=0, adt=120000, hv_share = 0.08, profile='DASD', lanes=3, gradient=0.03, section_length=10)
-# # bs = BasicSection(road_class='GPG', access_points=12, speed_limit=90, area_type=1, adt=60000, hv_share = 0.12, profile='DGPG', lanes=2, gradient=0.04, section_length=8)
-# # bs = BasicSection(road_class='GPG', access_points=12, speed_limit=90, area_type=1, adt=6000, hv_share = 0.3, profile='DGPG', lanes=2, gradient=0.05, section_length=8)
-
-print(round(2 * 4 * 2250 * bs.calculate_k15()/(bs.define_u50() * bs.calculate_ew()), -3))
-
+# bs = BasicSection(road_class='A', access_points=0.2, speed_limit=140, area_type=1, adt=30000, hv_share = 0.1, profile='DASM', lanes=3, gradient=0.02)
+# # # bs = BasicSection(road_class='S', access_points=0.7, speed_limit=110, area_type=0, adt=120000, hv_share = 0.08, profile='DASD', lanes=3, gradient=0.03)
+# # # bs = BasicSection(road_class='GPG', access_points=1.2, speed_limit=90, area_type=1, adt=60000, hv_share = 0.12, profile='DGPG', lanes=2, gradient=0.04)
+# # # bs = BasicSection(road_class='GPG', access_points=1.2, speed_limit=90, area_type=1, adt=6000, hv_share = 0.3, profile='DGPG', lanes=2, gradient=0.05)
 # speed, flow = bs.calculate_metrics_at_density(6.5)
 # print(speed, flow)  # Output: John 25
