@@ -198,6 +198,33 @@ class BasicSection:
         opt_speed = float(opt_speed_row.iloc[0]['opt_speed'])
         
         return opt_speed
+    
+    def calculate_jam_density(self):
+
+        ffs = self.calculate_ffs()
+        
+        # assess jam_density if ffs out-of-range
+        if self.road_class == 'A':
+            if ffs > 130:
+                ffs = 130
+            elif ffs < 90:
+                ffs = 90
+        elif self.road_class == 'S':
+            if ffs > 120:
+                ffs = 120
+            elif ffs < 90:
+                ffs = 90
+        else:
+            if ffs > 110:
+                ffs = 110
+            elif ffs < 80:
+                ffs = 80
+        
+        df = self.capacity_table
+        jam_density_row = df[(df['ffs'] == ffs) & (df['road_class'] == self.road_class)]
+        jam_density = float(jam_density_row.iloc[0]['jam_density'])
+        
+        return jam_density
 
     def van_aerde_calculations(self):
         """

@@ -110,12 +110,12 @@ with col[2]:
     
     if bs.calculate_avg_speed() != None:
         
+        st.metric(label='Free-flow speed [km/h]', 
+                    value=f"{ffs_speed}")
+        
         st.metric(label='Avg speed [km/h]', 
                     value=f"{avg_speed}",
                     delta=f"{round(100*(avg_speed - ffs_speed)/ffs_speed,1)}% to FFS")
-            
-        # st.metric(label='Free-flow speed [km/h]', 
-        #             value=f"{ffs_speed}")
             
         st.metric(label='Density [pc/km/lane]', 
                     value=f"{round(hourly_flow/avg_speed, 1)}")
