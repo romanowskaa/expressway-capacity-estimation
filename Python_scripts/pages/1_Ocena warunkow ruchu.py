@@ -119,7 +119,7 @@ with st.sidebar:
 
 
 
-col = st.columns((1.5, 6.5, 1.5), gap='medium')
+col = st.columns((2, 6, 2), gap='medium')
 
 bs = BasicSection(road_class=road_class, access_points=access_points, speed_limit=speed_limit, area_type=area_type, adt=adt, hv_share=hv_share, profile=profile, lanes=lanes, gradient=gradient)
 
@@ -142,27 +142,27 @@ with col[0]:
     base_capacity = bs.estimate_base_capacity()
     real_capacity = round(base_capacity * lanes * bs.calculate_k15() / bs.calculate_ew())
     
-    st.markdown('###### Parametry ruchu')
+    st.markdown('###### Parametry ruchu (w przekroju)')
 
-    st.metric(label='Natężenie ruchu [P/h]',
+    st.metric(label='Natężenie ruchu Qm [P/h]',
               value=hourly_volume)
     
-    st.metric(label='Przepustowość [P/h]',
+    st.metric(label='Przepustowość C [P/h]',
               value=real_capacity)
     
-    st.metric(label='Stopień wykorzystania', 
+    st.metric(label='Stopień wykorzystania X', 
               value=f"{round(100*hourly_flow/base_capacity, 1)}%")
     
 
     st.divider()
 
-    st.markdown('###### Wartości obliczeniowe')
+    st.markdown('###### Wartości obliczeniowe (na 1 pas ruchu)')
 
-    st.metric(label='Natężenie ruchu [E/h/pas]', 
+    st.metric(label='Natężenie ruchu Q0 [E/h/pas]', 
               value=f"{hourly_flow}",
               )
 
-    st.metric(label='Przepustowość [E/h/pas]',
+    st.metric(label='Przepustowość C0 [E/h/pas]',
               value=base_capacity)
     
 with col[2]: 
@@ -170,14 +170,14 @@ with col[2]:
     
     if bs.calculate_avg_speed() != None:
         
-        st.metric(label='Prędkość swobodna [km/h]', 
+        st.metric(label='Prędkość swobodna Vsw [km/h]', 
                     value=f"{ffs_speed}")
         
-        st.metric(label='Średnia prędkość [km/h]', 
+        st.metric(label='Średnia prędkość V [km/h]', 
                     value=f"{avg_speed}",
                     delta=f"{round(100*(avg_speed - ffs_speed)/ffs_speed,1)}% od swobodnej")
             
-        st.metric(label='Gęstość [E/km/pas]', 
+        st.metric(label='Gęstość k0 [E/km/pas]', 
                     value=f"{round(hourly_flow/avg_speed, 1)}")
 
     st.metric(label='PSR',
@@ -276,7 +276,7 @@ with col[1]:
         st.plotly_chart(scat_plot)
 
         ### table with critical densities
-        st.markdown('###### Tablica natężeń krytycznych [E/h/pas]')
+        st.markdown('###### Tablica natężeń krytycznych dla analizowanego odcinka [E/h/pas]')
     
         df_crit_flow = pd.DataFrame(
             {
