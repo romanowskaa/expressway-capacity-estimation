@@ -1,11 +1,11 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="Hello",
-    page_icon="👋",
+    page_title="Przepustowość i warunki ruchu",
+    page_icon=":oncoming_automobile:",
 )
 
-st.write("# Welcome to Streamlit! 👋")
+st.write("# Welcome to Streamlit! :motorway:")
 
 st.sidebar.success("Select the type of analysis above.")
 
