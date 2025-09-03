@@ -5,24 +5,19 @@ st.set_page_config(
     page_icon=":oncoming_automobile:",
 )
 
-st.write("# Welcome to Streamlit! :motorway:")
-
-st.sidebar.success("Select the type of analysis above.")
+st.write("# Witamy w programie! :motorway:")
 
 st.markdown(
     """
-    Streamlit is an open-source app framework built specifically for
-    Machine Learning and Data Science projects.
-    **👈 Select a demo from the sidebar** to see some examples
-    of what Streamlit can do!
-    ### Want to learn more?
-    - Check out [streamlit.io](https://streamlit.io)
-    - Jump into our [documentation](https://docs.streamlit.io)
-    - Ask a question in our [community
-        forums](https://discuss.streamlit.io)
-    ### See more complex demos
-    - Use a neural net to [analyze the Udacity Self-driving Car Image
-        Dataset](https://github.com/streamlit/demo-self-driving)
-    - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
+    Program służy do obliczeń przepustowości i oceny warunków ruchu na odcinkach międzywęzłowych autostrad, dróg ekspresowych i dwujezdniowych dróg klasy GP i G, na podstawie polskiej metody MOP-DZ, opracowanej w ramach projektu
+    badawczego „Nowoczesne metody obliczania przepustowości i oceny warunków ruchu dla dróg poza aglomeracjami miejskimi, w tym dla dróg szybkiego ruchu”. Projekt był realizowany w latach 2016-2017
+    przez konsorcjum Politechniki Krakowskiej, Politechniki Gdańskiej i Politechniki Warszawskiej w ramach Wspólnej Inicjatywy GDDKiA i NCBiR "Rozwój Innowacji Drogowych" (RID). 
+
 """
 )
+
+st.markdown("""
+            :red[**Przed rozpoczęciem korzystania z programu należy zapoznać się z instrukcją zawierającą szczegółowy opis metody dla odcinków międzywęzłowych.**] 
+            Program realizuje obliczenia zgodnie z metodą szczegółową opisaną w rozdziałach 3 i 4.
+                    """)
+st.link_button("Instrukcja oceny warunków ruchu - DODAĆ LINK", url="")
