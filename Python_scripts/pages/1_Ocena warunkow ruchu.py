@@ -79,10 +79,11 @@ with st.sidebar:
                               """
                             )
         if road_class == 'GPG':
-            profiles = ['DGPG']
+            profile = 'DGPG'
+
         else:
             profiles = ['DASM', 'DASS', 'DASD']
-            profiles_display = {'DGPG': 'mała', 'DASM': 'mała', 'DASS': 'średnia', 'DASD': 'duża'}
+            profiles_display = {'DASM': 'mała', 'DASS': 'średnia', 'DASD': 'duża'}
             profile = st.selectbox('*Zmienność sezonowa ruchu*', 
                                    profiles, 
                                    format_func=lambda x: profiles_display.get(x, str(x)),
@@ -156,14 +157,22 @@ with col[0]:
 
     st.divider()
 
-    st.markdown('###### Wartości obliczeniowe (na 1 pas ruchu)')
+    st.markdown('###### Wartości obliczeniowe')
 
-    st.metric(label='Natężenie ruchu Q0 [E/h/pas]', 
+    st.metric(label='Natężenie ruchu *Q$_{0}$* [E/h/pas]', 
               value=f"{hourly_flow}",
               )
 
-    st.metric(label='Przepustowość C0 [E/h/pas]',
+    st.metric(label='Przepustowość *C$_{0}$* [E/h/pas]',
               value=base_capacity)
+    
+    st.divider()
+
+    st.markdown('###### Pozostałe parametry modelu')
+    
+    st.metric(label="Gęstość maks. *k$_{max}$* [E/km/pas]", value=bs.calculate_jam_density())
+    st.metric(label="Prędkość opt. *V$_{op}$* [E/km/pas]", value=bs.calculate_opt_speed())
+
     
 with col[2]: 
     st.markdown('###### Warunki ruchu')

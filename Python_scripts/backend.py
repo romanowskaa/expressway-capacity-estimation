@@ -17,7 +17,6 @@ class BasicSection:
         self.profile = profile
         self.lanes = lanes
         self.gradient = gradient
-        # self.section_length = section_length
 
         # load dfs from csv files
         self.u50_table = pd.read_csv('data_tables\\u50.csv')
@@ -32,19 +31,16 @@ class BasicSection:
 
         if self.road_class == 'A':
             ffs = round(82.2 
-            # - 10.7 * self.calculate_access_point_density()
             - 10.7 * self.access_points
             + 7.7 * self.area_type
             + 0.334 * self.speed_limit)
         elif self.road_class == 'S':
             ffs = round(83.5 
-            # - 10.7 * self.calculate_access_point_density()
             - 10.7 * self.access_points
             + 7.7 * self.area_type
             + 0.334 * self.speed_limit)
         else:
             ffs = round(80.5 
-            # - 10.7 * self.calculate_access_point_density()
             - 10.7 * self.access_points
             + 7.7 * self.area_type
             + 0.334 * self.speed_limit)
@@ -196,7 +192,7 @@ class BasicSection:
         capacity = self.estimate_base_capacity()
         opt_speed = self.calculate_opt_speed()
         ffs = self.calculate_ffs()
-        jam_density = 150               #### to be checked!!!! ###
+        jam_density = self.calculate_jam_density()        
 
         # Van Aerde model coefficients
         m = (2* opt_speed - ffs) / ((ffs - opt_speed)**2)
@@ -284,9 +280,3 @@ class BasicSection:
     
 
 
-# bs = BasicSection(road_class='A', access_points=0.2, speed_limit=140, area_type=1, adt=30000, hv_share = 0.1, profile='DASM', lanes=3, gradient=0.02)
-# # # bs = BasicSection(road_class='S', access_points=0.7, speed_limit=110, area_type=0, adt=120000, hv_share = 0.08, profile='DASD', lanes=3, gradient=0.03)
-# # # bs = BasicSection(road_class='GPG', access_points=1.2, speed_limit=90, area_type=1, adt=60000, hv_share = 0.12, profile='DGPG', lanes=2, gradient=0.04)
-# # # bs = BasicSection(road_class='GPG', access_points=1.2, speed_limit=90, area_type=1, adt=6000, hv_share = 0.3, profile='DGPG', lanes=2, gradient=0.05)
-# speed, flow = bs.calculate_metrics_at_density(6.5)
-# print(speed, flow)  # Output: John 25

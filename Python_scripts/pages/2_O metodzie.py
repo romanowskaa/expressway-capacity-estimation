@@ -1,7 +1,4 @@
 import streamlit as st
-import altair as alt
-import plotly.graph_objects as go
-from pathlib import Path
 
 # page config
 st.set_page_config(
@@ -10,8 +7,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
-# alt.themes.enable("light")
 
 col = st.columns((3, 7), gap='medium')
 
