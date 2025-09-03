@@ -175,7 +175,7 @@ with col[2]:
         
         st.metric(label='Średnia prędkość V [km/h]', 
                     value=f"{avg_speed}",
-                    delta=f"{round(100*(avg_speed - ffs_speed)/ffs_speed,1)}% od swobodnej")
+                    delta=f"{round(100*(avg_speed - ffs_speed)/ffs_speed,1)}% wzgl. Vsw")
             
         st.metric(label='Gęstość k0 [E/km/pas]', 
                     value=f"{round(hourly_flow/avg_speed, 1)}")
