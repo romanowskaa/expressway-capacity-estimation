@@ -145,13 +145,13 @@ with col[0]:
     
     st.markdown('###### Parametry ruchu (w przekroju)')
 
-    st.metric(label='Natężenie ruchu Qm [P/h]',
+    st.metric(label='Natężenie ruchu *Q$_{m}$* [P/h]',
               value=hourly_volume)
     
-    st.metric(label='Przepustowość C [P/h]',
+    st.metric(label='Przepustowość *C* [P/h]',
               value=real_capacity)
     
-    st.metric(label='Stopień wykorzystania X', 
+    st.metric(label='Stopień wykorzystania *X*', 
               value=f"{round(100*hourly_flow/base_capacity, 1)}%")
     
 
@@ -179,14 +179,14 @@ with col[2]:
     
     if bs.calculate_avg_speed() != None:
         
-        st.metric(label='Prędkość swobodna Vsw [km/h]', 
+        st.metric(label='Prędkość swobodna *V$_{sw}$* [km/h]', 
                     value=f"{ffs_speed}")
         
-        st.metric(label='Średnia prędkość V [km/h]', 
+        st.metric(label='Średnia prędkość *V* [km/h]', 
                     value=f"{avg_speed}",
                     delta=f"{round(100*(avg_speed - ffs_speed)/ffs_speed,1)}% wzgl. Vsw")
             
-        st.metric(label='Gęstość k0 [E/km/pas]', 
+        st.metric(label='Gęstość *k$_{0}$* [E/km/pas]', 
                     value=f"{round(hourly_flow/avg_speed, 1)}")
 
     st.metric(label='PSR',
@@ -202,8 +202,8 @@ with col[1]:
         scat_plot = px.line(df, x=df_trafficx, y=df_trafficy)
 
         scat_plot.update_layout(title='Zależność prędkości od natężenia ruchu', 
-                                            yaxis=dict(title='Średnia prędkość [km/h]', range=[0, 150]),
-                                            xaxis=dict(title='Natężenie obliczeniowe ruchu [E/h/pas]', range=[0, 2500]))
+                                            yaxis=dict(title='Średnia prędkość V [km/h]', range=[0, 150]),
+                                            xaxis=dict(title='Natężenie obliczeniowe ruchu Q0 [E/h/pas]', range=[0, 2500]))
             
         scat_plot.update_layout()
 
