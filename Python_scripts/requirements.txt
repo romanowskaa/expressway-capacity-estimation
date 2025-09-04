@@ -1,6 +1,4 @@
-pandas
-numpy
-math
-streamlit
-plotly.express
-plotly.graph_objects
+pandas==2.3.2          # wydany 21 sierpnia 2025 r. :contentReference[oaicite:0]{index=0}
+numpy==2.3.2           # wydany 24 lipca 2025 r. :contentReference[oaicite:1]{index=1}
+plotly==6.3.0          # wydany 12 sierpnia 2025 r. :contentReference[oaicite:2]{index=2}
+streamlit==1.49.1      # wydany 29 sierpnia 2025 r. :contentReference[oaicite:3]{index=3}
