@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import math
+from pathlib import Path
 
 class BasicSection:
     """
@@ -19,10 +20,10 @@ class BasicSection:
         self.gradient = gradient
 
         # load dfs from csv files
-        self.u50_table = pd.read_csv('data_tables/u50.csv')
-        self.ew_table = pd.read_csv('data_tables/ew_rate.csv')
-        self.los_table = pd.read_csv('data_tables/psr_bound.csv')
-        self.capacity_table = pd.read_csv('data_tables/capacity.csv')
+        self.u50_table = pd.read_csv(Path(__file__).parent / 'data_tables' / 'u50.csv')
+        self.ew_table = pd.read_csv(Path(__file__).parent / 'data_tables' / 'ew_rate.csv')
+        self.los_table = pd.read_csv(Path(__file__).parent / 'data_tables' / 'psr_bound.csv')
+        self.capacity_table = pd.read_csv(Path(__file__).parent / 'data_tables' / 'capacity.csv')
     
     def calculate_ffs(self):
         """
