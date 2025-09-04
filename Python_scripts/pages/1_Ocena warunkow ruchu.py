@@ -84,6 +84,7 @@ with st.sidebar:
                               min_value=0, 
                               max_value=300000, 
                               value=30000, 
+                              step=10000,
                               help="""
                               Wprowadź wartość SDR **dla całego przekroju drogi**. Na podstawie 
                               SDR i profilu drogi (zmienność sezonowa), wyznaczane jest miarodajne godzinowe natężenie ruchu w analizowanym kierunku ruchu,
