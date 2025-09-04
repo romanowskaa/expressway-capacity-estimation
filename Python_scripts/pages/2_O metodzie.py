@@ -73,12 +73,12 @@ with col[1]:
         st.markdown("""
                 Przed przystąpieniem do obliczeń należy zebrać informacje dotyczące:  
                 - klasy drogi (A, S, GP lub G),  
-                - liczby pasów ruchu w jednym kierunku (2 lub 3),  
+                - liczby pasów ruchu w danym kierunku (2 lub 3),  
                 - lokalizacji drogi (obszar aglomeracyjny lub zamiejski),  
                 - pochylenia podłużnego odcinka (w %),  
                 - dostępności do drogi (gęstość wjazdów i wyjazdów),  
                 - ograniczenia prędkości dopuszczalnej,  
-                - rzeczywistych lub prognozowanych natężeń ruchu (SDR lub miarodajne godzinowe natężenie ruchu),  
+                - rzeczywistych lub prognozowanych natężeń ruchu (SDR dla przekroju lub miarodajne godzinowe natężenie ruchu dla danego kierunku),  
                 - udziału pojazdów ciężkich.
         """)
 
@@ -88,7 +88,7 @@ with col[1]:
                         Dane wejściowe wprowadza się poprzez wybór opcji z listy rozwijanej lub wprowadzenie wartości liczbowej.  
                         
                     W przypadku natężenia ruchu, możliwe jest wprowadzenie:  
-                    - średniego dobowego ruchu rocznego SDR (rzeczywistego lub prognozowanego, w zależności od rodzaju analizy) - w takim przypadku należy wskazać jaka jest zmienność sezonowa ruchu, z której wynika udział godziny miarodajnej w SDR.
+                    - średniego dobowego ruchu rocznego SDR (rzeczywistego lub prognozowanego, w zależności od rodzaju analizy) - w takim przypadku należy wskazać jaka jest zmienność sezonowa ruchu, z której wynika udział godziny miarodajnej w SDR. Domyślnie przyjmowany jest równomierny rozkład kierunkowy ruchu.
                     - miarodajnego godzinowego natężenia ruchu 
                         - w przypadku, gdy dysponuje się danymi z pomiarów dla drogi istniejącej, należy wyznaczyć natężenie miarodajne zgodnie z instrukcją (rozdział 3.5.3)
                     
