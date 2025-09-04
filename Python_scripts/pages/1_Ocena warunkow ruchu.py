@@ -183,10 +183,10 @@ with col[0]:
 
     st.markdown('###### Parametry modelu Van Aerde')
     
-    st.metric(label='Prędkość swobodna *V$_{sw}$* [km/h]', value=f"{ffs_speed}")
-    st.metric(label="Prędkość opt. *V$_{op}$* [E/km/pas]", value=bs.calculate_opt_speed())
-    st.metric(label='Przepustowość *C$_{0}$* [E/h/pas]', value=base_capacity)
-    st.metric(label="Gęstość maks. *k$_{max}$* [E/km/pas]", value=bs.calculate_jam_density())
+    st.metric(label='*V$_{sw}$* [km/h]', value=f"{ffs_speed}")
+    st.metric(label="*V$_{op}$* [E/km/pas]", value=bs.calculate_opt_speed())
+    st.metric(label='*C$_{0}$* [E/h/pas]', value=base_capacity)
+    st.metric(label="*k$_{max}$* [E/km/pas]", value=bs.calculate_jam_density())
     
 with col[2]: 
     st.markdown('###### Warunki ruchu')
