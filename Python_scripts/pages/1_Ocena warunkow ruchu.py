@@ -3,6 +3,7 @@ from backend import BasicSection
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
+from pathlib import Path
 
 # page config
 st.set_page_config(
@@ -320,5 +321,5 @@ with col[1]:
                      Natężenie ruchu wymuszonego może oscylować od małego do dużego. Stan taki występuje często z powodu wypadków lub innych zdarzeń drogowych, 
                      zawężenia przekroju lub innych przyczyn obniżających przepustowość (tzw. lokalne ograniczenie przepustowości).
             ''')
-            st.image("files\\congested_traffic.png")
+            st.image(Path(__file__).parent.parent / 'files' / 'congested_traffic.png')
     

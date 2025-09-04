@@ -1,4 +1,5 @@
 import streamlit as st
+from pathlib import Path
 
 # page config
 st.set_page_config(
@@ -61,7 +62,7 @@ with col[1]:
                 - obszar wyjazdu: 450 m, mierzony od końca łuku kołowego na łącznicy, w kierunku przeciwnym do kierunku ruchu,  
                 - obszar przeplatania: 150 m, mierzone od końca łuku kołowego na łącznicach, w obu kierunkach.  
         """)
-        st.image("files\droga.png", width=600)
+        st.image(Path(__file__).parent.parent / 'files' / 'droga.png', width=600)
 
         st.markdown("""
                     Odcinki międzywęzłowe należy podzielić na odcinki jednorodne pod względem warunków drogowo-ruchowych. W szczególności, wymagana jest jednorodność geometryczna (liczba pasów ruchu, szerokość pasów ruchu oraz pasa awaryjnego, pochylenia podłużne), 
@@ -105,7 +106,7 @@ with col[1]:
                     Przepustowości są podane dla prędkości z krokiem 5 km/h. W programie, w przypadku wartości pośrednich *V$_{sw}$*, wartości przepustowości są interpolowane. Z tabeli można odczytać ponadto prędkość optymalną, a więc prędkość występującą przy natężeniu ruchu równym przepustowości.
 
                     """)
-        st.image("files//przepustowosc.png", width=700)
+        st.image(Path(__file__).parent.parent / 'files' / 'przepustowosc.png', width=700)
 
         st.markdown("""
                     Następnie, program wylicza stopień wykorzystania przepustowości X jako stosunek natężenia ruchu do przepustowości. Jeżeli X przekracza 1 oznacza to, że natężenie ruchu przekracza przepustowość drogi, występuje Poziom Swobody Ruchu PSR F,
@@ -123,7 +124,7 @@ with col[1]:
                     Na podstawie gęstości wyznaczonej w kroku 6, określany jest Poziom Swobody Ruchu PSR. Tablica poniżej przedstawia wartości graniczne gęstości dla poszczególnych PSR.
                     """)
 
-        st.image("files//psr.png", width=300)
+        st.image(Path(__file__).parent.parent / 'files' / 'psr.png', width=300)
 
         st.markdown("""
                     Program wyznacza ponadto natężenia krytyczne dla analizowanego odcinka, tj. graniczne obliczeniowe natężenia ruchu dla poszczególnych PSR.
@@ -142,5 +143,9 @@ with col[0]:
                 **Procedura oceny warunków ruchu**
                 """)
     
-    st.image("files//r4_online.png", width=400)
+    st.image(Path(__file__).parent.parent / 'files' / 'r4_online.png', width=400)
+
+    st.divider()
+
+    st.link_button(":blue[:arrow_right: **INSTRUKCJA PDF** (dodać link!!!)]", url="")
     
