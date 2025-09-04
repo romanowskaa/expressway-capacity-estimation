@@ -155,7 +155,7 @@ with col[0]:
     base_capacity = bs.estimate_base_capacity()
     real_capacity = round(base_capacity * lanes * bs.calculate_k15() / bs.calculate_ew())
     
-    st.markdown('###### Parametry ruchu (w przekroju)')
+    st.markdown('###### Parametry przekroju')
 
     st.metric(label='Natężenie ruchu *Q$_{m}$* [P/h]',
               value=hourly_volume)
@@ -163,28 +163,30 @@ with col[0]:
     st.metric(label='Przepustowość *C* [P/h]',
               value=real_capacity)
     
-    st.metric(label='Stopień wykorzystania *X*', 
-              value=f"{round(100*hourly_flow/base_capacity, 1)}%")
-    
 
     st.divider()
 
-    st.markdown('###### Wartości obliczeniowe')
+    st.markdown('###### Wartości obliczeniowe parametrów (na pas ruchu)')
 
     st.metric(label='Natężenie ruchu *Q$_{0}$* [E/h/pas]', 
               value=f"{hourly_flow}",
               )
 
-    st.metric(label='Przepustowość *C$_{0}$* [E/h/pas]',
-              value=base_capacity)
+    st.metric(label='Przepustowość *C$_{0}$* [E/h/pas]', 
+              value=base_capacity
+              )
+    
+    st.metric(label='Stopień wykorzystania *X*', 
+              value=f"{round(100*hourly_flow/base_capacity, 1)}%")
     
     st.divider()
 
-    st.markdown('###### Pozostałe parametry modelu')
+    st.markdown('###### Parametry modelu Van Aerde')
     
-    st.metric(label="Gęstość maks. *k$_{max}$* [E/km/pas]", value=bs.calculate_jam_density())
+    st.metric(label='Prędkość swobodna *V$_{sw}$* [km/h]', value=f"{ffs_speed}")
     st.metric(label="Prędkość opt. *V$_{op}$* [E/km/pas]", value=bs.calculate_opt_speed())
-
+    st.metric(label='Przepustowość *C$_{0}$* [E/h/pas]', value=base_capacity)
+    st.metric(label="Gęstość maks. *k$_{max}$* [E/km/pas]", value=bs.calculate_jam_density())
     
 with col[2]: 
     st.markdown('###### Warunki ruchu')
