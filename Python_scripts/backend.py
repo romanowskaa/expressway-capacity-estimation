@@ -19,10 +19,10 @@ class BasicSection:
         self.gradient = gradient
 
         # load dfs from csv files
-        self.u50_table = pd.read_csv('data_tables\\u50.csv')
-        self.ew_table = pd.read_csv('data_tables\\ew_rate.csv')
-        self.los_table = pd.read_csv('data_tables\\psr_bound.csv')
-        self.capacity_table = pd.read_csv('data_tables\\capacity.csv')
+        self.u50_table = pd.read_csv('data_tables/u50.csv')
+        self.ew_table = pd.read_csv('data_tables/ew_rate.csv')
+        self.los_table = pd.read_csv('data_tables/psr_bound.csv')
+        self.capacity_table = pd.read_csv('data_tables/capacity.csv')
     
     def calculate_ffs(self):
         """
