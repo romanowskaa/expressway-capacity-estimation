@@ -12,6 +12,11 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# błąd dostępu, jeśli nie wprowadzono hasła
+if not st.session_state.get("logged_in", False):
+    st.error("🚫 Brak dostępu. Wróć na stronę główną i zaloguj się.")
+    st.stop()
+
 # sidebar
 with st.sidebar:
     st.subheader(':oncoming_automobile: Dane wejściowe')
@@ -22,7 +27,12 @@ with st.sidebar:
                               road_classes, 
                               format_func=lambda x: road_classes_display.get(x, str(x)))
 
-    speed_limits = [80, 90, 100, 110, 120, 130, 140]
+    if road_class == "A":
+        speed_limits = [140, 130, 120, 110, 100]
+    elif road_class == "S":
+        speed_limits = [120, 110, 100, 90]
+    else:
+        speed_limits = [110, 100, 90, 80]
     speed_limit = st.selectbox('Ograniczenie prędkości [km/h]', 
                                speed_limits)
 
@@ -40,7 +50,7 @@ with st.sidebar:
                             """
                 )
     
-    lanes_list = [2, 3]
+    lanes_list = [2, 3, 4]
     lanes = st.selectbox('Liczba pasów', 
                          lanes_list,
                          help='Liczba pasów dotyczy jednego, analizowanego kierunku ruchu')
@@ -53,7 +63,7 @@ with st.sidebar:
     access_points = st.number_input('Gęstość wjazdów i wyjazdów [liczba/km]', 
                                     min_value=0.0, 
                                     max_value=2.5, 
-                                    value=.0, 
+                                    value=.5, 
                                     step=.1, 
                                     help="""
                                     **Drogi klasy A i S:** tzw. gęstość wjazdów i wyjazdów oblicza się jako liczbę 
@@ -112,7 +122,7 @@ with st.sidebar:
         adt = int(2 * input_hourly_volume / 0.095)
         profile = 'DGPG'
     
-    hv_share = st.number_input('Udział pojazdów ciężkich', min_value=0.0, max_value=1.0, value=0.0, step=0.01, 
+    hv_share = st.number_input('Udział pojazdów ciężkich', min_value=0.0, max_value=1.0, value=0.1, step=0.01, 
                                     help="""
                                     Jako pojazdy ciężkie należy traktować: samochody ciężarowe, ciężarowe z przyczepą, ciągniki siodłowe, autobusy.
                                     """

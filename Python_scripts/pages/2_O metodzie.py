@@ -8,6 +8,11 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# błąd dostępu, jeśli nie wprowadzono hasła
+if not st.session_state.get("logged_in", False):
+    st.error("🚫 Brak dostępu. Wróć na stronę główną i zaloguj się.")
+    st.stop()
+
 col = st.columns((3, 7), gap='medium')
 
 

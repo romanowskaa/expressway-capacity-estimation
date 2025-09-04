@@ -122,6 +122,13 @@ class BasicSection:
             max_gradient = 0.04
         else:
             max_gradient = 0.05
+        
+        # choose conversion factor if lanes==4 (not covered in method)
+                ### TO BE DECIDED!!!
+        if self.lanes == 4:
+            no_of_lanes = 3
+        else:
+            no_of_lanes = self.lanes
 
         # calculate light vehicles conversion factor
         Es_row = self.ew_table[(self.ew_table['veh_type'] == 'lv') 
@@ -131,7 +138,7 @@ class BasicSection:
         # calculate heavy vehicles conversion factor
         Ec_row = self.ew_table[(self.ew_table['veh_type'] == 'hv') 
                                & (self.ew_table['road_class'] == self.road_class) 
-                               & (self.ew_table['lanes'] == self.lanes)
+                               & (self.ew_table['lanes'] == no_of_lanes)
                                & (self.ew_table['max_util_rate'] == est_util_rate)
                                & (self.ew_table['max_gradient'] == max_gradient)]
         Ec = float(Ec_row.iloc[0]['conv_factor'])
