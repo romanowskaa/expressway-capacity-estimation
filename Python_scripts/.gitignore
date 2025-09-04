@@ -1,3 +1,6 @@
 .streamlit/secrets.toml
 data_tables/import_tables.py
 test_backend.py
+__pycache__/
+*.pyc
+.pytest_cache/
