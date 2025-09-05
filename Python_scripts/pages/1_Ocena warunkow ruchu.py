@@ -163,10 +163,12 @@ with col[0]:
     st.metric(label='Przepustowość *C* [P/h]',
               value=real_capacity)
     
+    st.metric(label='Stopień wykorzystania *X*', 
+              value=f"{round(100*hourly_flow/base_capacity, 1)}%")
 
     st.divider()
 
-    st.markdown('###### Wartości obliczeniowe parametrów (na pas ruchu)')
+    st.markdown('###### Wartości obliczeniowe')
 
     st.metric(label='Natężenie ruchu *Q$_{0}$* [E/h/pas]', 
               value=f"{hourly_flow}",
@@ -175,13 +177,11 @@ with col[0]:
     st.metric(label='Przepustowość *C$_{0}$* [E/h/pas]', 
               value=base_capacity
               )
-    
-    st.metric(label='Stopień wykorzystania *X*', 
-              value=f"{round(100*hourly_flow/base_capacity, 1)}%")
+
     
     st.divider()
 
-    st.markdown('###### Parametry modelu Van Aerde')
+    st.markdown('###### Parametry modelu')
     
     st.metric(label='*V$_{sw}$* [km/h]', value=f"{ffs_speed}")
     st.metric(label="*V$_{op}$* [E/km/pas]", value=bs.calculate_opt_speed())
